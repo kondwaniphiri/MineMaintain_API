@@ -26,17 +26,22 @@ class DatabaseSettings(BaseSettings):
     def validate_database_url(cls, value: SecretStr | None) -> SecretStr | None:
         if value is None:
             return None
+        raw_url = value.get_secret_value().strip()
         try:
-            url = make_url(value.get_secret_value())
+            url = make_url(raw_url)
         except (ArgumentError, ValueError, TypeError):
-            raise ValueError("Use a valid postgresql+psycopg URL") from None
-        if url.drivername != "postgresql+psycopg":
-            raise ValueError("Use a postgresql+psycopg URL")
-        return value
+            raise ValueError("Paste a valid PostgreSQL connection URL") from None
+        if url.drivername not in {"postgres", "postgresql", "postgresql+psycopg"}:
+            raise ValueError(
+                "Use a postgres://, postgresql://, or postgresql+psycopg:// URL"
+            )
+        return SecretStr(raw_url)
 
     def connection_url(self) -> URL:
         if self.database_url is not None:
-            return make_url(self.database_url.get_secret_value())
+            return make_url(self.database_url.get_secret_value()).set(
+                drivername="postgresql+psycopg"
+            )
         return URL.create(
             "postgresql+psycopg",
             username=self.db_user,

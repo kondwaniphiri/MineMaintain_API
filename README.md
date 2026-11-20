@@ -103,7 +103,8 @@ build and smoke-test the image, and exercise the collection on a staging
 database. Supply `ENVIRONMENT=production`, the signing secret, and the
 database credentials through the host's secret store. The container's default
 startup command applies migrations and binds to `PORT` (8000 by default).
-On Render, leave the Docker Command field blank to use that default. Use
+On Render, paste the Internal Database URL directly into `DATABASE_URL`.
+Leave the Docker Command field blank to use the image default. Use
 HTTPS at the ingress and verify backup and restore on the target host.
 
 `GET /health/live` checks the process and `GET /health/ready` checks database

@@ -1,3 +1,5 @@
+import pytest
+
 from app.core.config import DatabaseSettings
 
 
@@ -20,3 +22,16 @@ def test_full_url_overrides_individual_settings(monkeypatch):
     )
     url = DatabaseSettings(_env_file=None).connection_url()
     assert (url.host, url.port, url.database) == ("override.example", 5544, "service")
+
+
+@pytest.mark.parametrize("scheme", ["postgres", "postgresql", "postgresql+psycopg"])
+def test_hosted_database_urls_use_psycopg(monkeypatch, scheme):
+    monkeypatch.setenv(
+        "DATABASE_URL",
+        f" {scheme}://service:demo%40pass@dpg-demo/db?sslmode=require ",
+    )
+    url = DatabaseSettings(_env_file=None).connection_url()
+    assert url.drivername == "postgresql+psycopg"
+    assert url.password == "demo@pass"
+    assert url.host == "dpg-demo"
+    assert url.query["sslmode"] == "require"
