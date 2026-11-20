@@ -12,4 +12,4 @@ COPY scripts scripts
 RUN useradd --create-home api
 USER api
 ENV PATH="/app/.venv/bin:$PATH"
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--workers", "1", "--no-proxy-headers", "--no-access-log"]
+CMD ["/bin/sh", "/app/scripts/start.sh"]
