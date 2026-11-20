@@ -1,0 +1,35 @@
+meta {
+  name: Verify independently
+  type: http
+  seq: 20
+}
+
+post {
+  url: {{base_url}}/work-orders/{{order_id}}/verification
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{supervisor_token}}
+  Idempotency-Key: {{run_id}}-verification
+}
+
+body:json {
+  {
+    "expected_version": {{version}},
+    "decision": "ACCEPT",
+    "notes": "Reviewed fictional repair evidence."
+  }
+}
+
+script:post-response {
+  bru.setVar("version", res.getBody().version);
+}
+
+tests {
+  test("Verify independently", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().status).to.equal("CLOSED");
+  });
+}

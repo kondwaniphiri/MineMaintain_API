@@ -1,0 +1,23 @@
+meta {
+  name: Read asset history
+  type: http
+  seq: 21
+}
+
+get {
+  url: {{base_url}}/assets/{{asset_id}}/maintenance-history?page_size=100
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{supervisor_token}}
+}
+
+tests {
+  test("Read asset history", function () {
+    expect(res.getStatus()).to.equal(200);
+    const orderId = bru.getVar("order_id");
+    expect(res.getBody().items.some(event => event.resource_id === orderId && event.action === "VERIFICATION_RECORDED")).to.equal(true);
+  });
+}

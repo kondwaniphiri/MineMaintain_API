@@ -1,0 +1,29 @@
+meta {
+  name: Reject start before assignment
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{base_url}}/work-orders/{{order_id}}/start
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{technician_token}}
+  Idempotency-Key: {{run_id}}-premature-start
+}
+
+body:json {
+  {
+    "expected_version": {{version}},
+    "note": "Premature start"
+  }
+}
+
+tests {
+  test("Reject start before assignment", function () {
+    expect(res.getStatus()).to.equal(404);
+  });
+}

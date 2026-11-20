@@ -1,0 +1,37 @@
+meta {
+  name: Submit repair evidence
+  type: http
+  seq: 19
+}
+
+post {
+  url: {{base_url}}/work-orders/{{order_id}}/submit-for-verification
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{technician_token}}
+  Idempotency-Key: {{run_id}}-submit-for-verification
+}
+
+body:json {
+  {
+    "expected_version": {{version}},
+    "diagnosis": "Bearing wear",
+    "repair_summary": "Replacement documented",
+    "test_results": "Fictional test results recorded",
+    "external_reference": "DEMO-WORK-REF"
+  }
+}
+
+script:post-response {
+  bru.setVar("version", res.getBody().version);
+}
+
+tests {
+  test("Submit repair evidence", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().status).to.equal("AWAITING_VERIFICATION");
+  });
+}

@@ -1,0 +1,49 @@
+name: API checks
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: minemaintain_test
+          POSTGRES_USER: minemaintain_test
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U minemaintain_test -d minemaintain_test"
+          --health-interval 3s --health-timeout 3s --health-retries 10
+    env:
+      TEST_DATABASE_URL: postgresql+psycopg://minemaintain_test:ci-only-password@localhost:5432/minemaintain_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          enable-cache: true
+          version: "0.13.5"
+      - run: uv sync --locked
+      - run: uv run --locked ruff check .
+      - run: uv run --locked ruff format --check .
+      - run: uv run --locked pytest
+
+  compose-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build image and check readiness
+        env:
+          COMPOSE_PROJECT_NAME: minemaintain-ci
+        run: |
+          export POSTGRES_PASSWORD="$(python3 -c 'import secrets; print(secrets.token_urlsafe(32))')"
+          export JWT_SECRET="$(python3 -c 'import secrets; print(secrets.token_urlsafe(48))')"
+          trap 'docker compose down --volumes' EXIT
+          docker compose up --build --wait --wait-timeout 120
+          curl --fail --silent --show-error http://127.0.0.1:8000/health/ready

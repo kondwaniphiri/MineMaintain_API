@@ -1,0 +1,36 @@
+meta {
+  name: Assign work
+  type: http
+  seq: 11
+}
+
+post {
+  url: {{base_url}}/work-orders/{{order_id}}/assignment
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{supervisor_token}}
+  Idempotency-Key: {{run_id}}-assignment
+}
+
+body:json {
+  {
+    "expected_version": {{version}},
+    "technician_id": "{{technician_id}}",
+    "due_at": "{{due_at}}",
+    "reason": "Mechanical inspection"
+  }
+}
+
+script:post-response {
+  bru.setVar("version", res.getBody().version);
+}
+
+tests {
+  test("Assign work", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().status).to.equal("ASSIGNED");
+  });
+}

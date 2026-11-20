@@ -1,0 +1,9 @@
+.git
+.env
+.venv
+.uv-cache
+.uv-python
+.pg-test
+.bruno-tools
+.npm-cache
+**/__pycache__

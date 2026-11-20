@@ -1,0 +1,28 @@
+meta {
+  name: Login technician
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{base_url}}/auth/token
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "technician@mopani-demo.example.com",
+    "password": "{{demo_password}}"
+  }
+}
+
+script:post-response {
+  bru.setVar("technician_token", res.getBody().access_token);
+}
+
+tests {
+  test("Login technician", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

@@ -1,0 +1,29 @@
+meta {
+  name: Reject resume before starting
+  type: http
+  seq: 12
+}
+
+post {
+  url: {{base_url}}/work-orders/{{order_id}}/resume
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{technician_token}}
+  Idempotency-Key: {{run_id}}-premature-resume
+}
+
+body:json {
+  {
+    "expected_version": {{version}},
+    "note": "Premature resume"
+  }
+}
+
+tests {
+  test("Reject resume before starting", function () {
+    expect(res.getStatus()).to.equal(409);
+  });
+}

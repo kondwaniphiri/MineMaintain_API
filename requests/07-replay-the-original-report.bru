@@ -1,0 +1,33 @@
+meta {
+  name: Replay the original report
+  type: http
+  seq: 7
+}
+
+post {
+  url: {{base_url}}/fault-reports
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{operator_token}}
+  Idempotency-Key: {{run_id}}-fault
+}
+
+body:json {
+  {
+    "asset_id": "{{asset_id}}",
+    "title": "Process pump stopped",
+    "symptoms": "The pump stopped after unusual vibration.",
+    "observed_at": "{{observed_at}}",
+    "suggested_priority": "HIGH"
+  }
+}
+
+tests {
+  test("Replay the original report", function () {
+    expect(res.getStatus()).to.equal(201);
+    expect(res.getBody().id).to.equal(bru.getVar("report_id"));
+  });
+}

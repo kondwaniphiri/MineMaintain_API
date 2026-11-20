@@ -1,0 +1,34 @@
+meta {
+  name: Pause for parts
+  type: http
+  seq: 14
+}
+
+post {
+  url: {{base_url}}/work-orders/{{order_id}}/pause-for-parts
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{technician_token}}
+  Idempotency-Key: {{run_id}}-pause-for-parts
+}
+
+body:json {
+  {
+    "expected_version": {{version}},
+    "reason": "Waiting for a replacement bearing."
+  }
+}
+
+script:post-response {
+  bru.setVar("version", res.getBody().version);
+}
+
+tests {
+  test("Pause for parts", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().status).to.equal("AWAITING_PARTS");
+  });
+}

@@ -1,0 +1,30 @@
+meta {
+  name: Find demo pump
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{base_url}}/assets?asset_code=PUMP-001
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{operator_token}}
+}
+
+script:post-response {
+  const now = new Date();
+  bru.setVar("asset_id", res.getBody().items[0].id);
+  bru.setVar("run_id", String(now.getTime()));
+  bru.setVar("observed_at", now.toISOString());
+  bru.setVar("due_at", new Date(now.getTime() + 86400000).toISOString());
+  bru.setVar("work_date", now.toISOString().slice(0, 10));
+}
+
+tests {
+  test("Find demo pump", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

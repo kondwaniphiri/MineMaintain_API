@@ -1,0 +1,22 @@
+meta {
+  name: Read maintenance summary
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{base_url}}/reports/maintenance-summary
+  body: none
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{supervisor_token}}
+}
+
+tests {
+  test("Read maintenance summary", function () {
+    expect(res.getStatus()).to.equal(200);
+    expect(res.getBody().by_status.CLOSED).to.be.greaterThan(0);
+  });
+}

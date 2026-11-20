@@ -1,0 +1,34 @@
+meta {
+  name: Record diagnosis
+  type: http
+  seq: 16
+}
+
+post {
+  url: {{base_url}}/work-orders/{{order_id}}/notes
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{technician_token}}
+  Idempotency-Key: {{run_id}}-notes
+}
+
+body:json {
+  {
+    "expected_version": {{version}},
+    "kind": "DIAGNOSIS",
+    "text": "Bearing wear observed in the fictional test case."
+  }
+}
+
+script:post-response {
+  bru.setVar("version", res.getBody().version);
+}
+
+tests {
+  test("Record diagnosis", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

@@ -1,0 +1,35 @@
+meta {
+  name: Record labour
+  type: http
+  seq: 17
+}
+
+post {
+  url: {{base_url}}/work-orders/{{order_id}}/labour
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{technician_token}}
+  Idempotency-Key: {{run_id}}-labour
+}
+
+body:json {
+  {
+    "expected_version": {{version}},
+    "minutes": 60,
+    "work_date": "{{work_date}}",
+    "description": "Fictional inspection and repair."
+  }
+}
+
+script:post-response {
+  bru.setVar("version", res.getBody().version);
+}
+
+tests {
+  test("Record labour", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

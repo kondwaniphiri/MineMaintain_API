@@ -1,0 +1,36 @@
+meta {
+  name: Record part usage
+  type: http
+  seq: 18
+}
+
+post {
+  url: {{base_url}}/work-orders/{{order_id}}/parts-used
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{technician_token}}
+  Idempotency-Key: {{run_id}}-parts-used
+}
+
+body:json {
+  {
+    "expected_version": {{version}},
+    "part_code": "BRG-001",
+    "description": "Replacement bearing",
+    "quantity": "1",
+    "unit": "each"
+  }
+}
+
+script:post-response {
+  bru.setVar("version", res.getBody().version);
+}
+
+tests {
+  test("Record part usage", function () {
+    expect(res.getStatus()).to.equal(200);
+  });
+}

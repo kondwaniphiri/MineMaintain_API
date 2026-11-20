@@ -1,0 +1,30 @@
+meta {
+  name: Reject operator conversion
+  type: http
+  seq: 8
+}
+
+post {
+  url: {{base_url}}/fault-reports/{{report_id}}/work-order
+  body: json
+  auth: none
+}
+
+headers {
+  Authorization: Bearer {{operator_token}}
+  Idempotency-Key: {{run_id}}-operator-convert
+}
+
+body:json {
+  {
+    "expected_version": {{version}},
+    "priority": "HIGH",
+    "review_notes": "Inspect the fictional pump."
+  }
+}
+
+tests {
+  test("Reject operator conversion", function () {
+    expect(res.getStatus()).to.equal(403);
+  });
+}
